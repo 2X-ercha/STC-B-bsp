@@ -1,0 +1,197 @@
+C51 COMPILER V9.51   MAIN                                                                  10/13/2022 00:17:01 PAGE 1   
+
+
+C51 COMPILER V9.51, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\dist\main.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE src\main.c BROWSE DEBUG OBJECTEXTEND PRINT(.\main.lst) TABS(2) OBJECT(.\dis
+                    -t\main.obj)
+
+line level    source
+
+   1          #include <STC15F2K60S2.H>
+   2          #include <math.h>
+   3          #include <intrins.h>    // 固有函数
+   4          #include <absacc.h>     // 访问特殊功能寄存器（可能用不到）
+   5          #include <stdio.h>      // 动态分配内存函数
+   6          #include <stdlib.h>     // 标准库
+   7          
+   8          // 以上用不用的到不知道，反正先放着
+   9          
+  10          // debug
+  11          unsigned char ledtest = 0x0f;
+  12          unsigned char leftbit = 0;
+  13          
+  14          // seg & led 寄存器备注说明
+  15          /*
+  16           * P0: P07 - P00 高电平有效
+  17           * 功能1：数码管单个段选
+  18           *      管脚编码位：（小数点为8)
+  19           *     ----    0
+  20           *    |    |     5   1
+  21           *     ----      6
+  22           *    |    |     4   2
+  23           *     ---- -    5   7
+  24           *      管脚对应寄存器即为 P00 - P07
+  25           * 功能2: led灯选择（刚好8个，从左往右 P07 - P00 ）
+  26           * 
+  27           * P2:
+  28           *  P22 - P20
+  29           *      选择第n个数码管点亮（高速循环来完成视觉暂留）
+  30           *  P23 （注 E3 连接到数码管中）
+  31           *      设为0则数码管显示，设为1则led显示
+  32           */
+  33          
+  34          /*
+  35           * 推挽等寄存器初始化相关
+  36           * P0: （芯片数据手册 p324）
+  37           *  例如：（00：准双向口    01：推挽输出    10：仅为输入    11：开漏（可读可写�
+             -��
+  38           *          P07     P06     P05     P04     P03     P02     P01     P00
+  39           *  P0M1:   1       0       1       0       0       0       0       0
+  40           *  P0M0:   1       1       0       0       0       0       0       0
+  41           *          开漏    推挽    输入     准双向    
+  42           * 
+  43           * P2: （芯片数据手册 p323）
+  44           *  同上
+  45           * 这里对于seg和led而言，显然只需要设为推挽输出即可
+  46           */
+  47          
+  48          unsigned char seg_display_buf[8] = {0,0,0,0,0,0,0,0};    // 存储各个数码管显示位的具体值
+  49          unsigned char led_display_buf = 0;                       // 存储led显示值
+  50          
+  51          unsigned char display_pos = 0;
+  52          
+  53          void Seg_Led_Init(){
+C51 COMPILER V9.51   MAIN                                                                  10/13/2022 00:17:01 PAGE 2   
+
+  54   1          // P0、P2口全部设为推挽输出
+  55   1          P0M1 = 0x00;
+  56   1          P0M0 = 0xff;
+  57   1          P2M1 &= 0xf0;
+  58   1          P2M0 |= 0x0f;
+  59   1      }
+  60          
+  61          void OneSeg_Print(unsigned char num, unsigned char displaychar){
+  62   1          /*
+  63   1           * description:
+  64   1           *  单字符数码管显示修改
+  65   1           * parameter:
+  66   1           *  num: 修改的目标数码管编号，从左到右依次为 0-7
+  67   1           *  displaychar: 修改后显示的字符 
+  68   1           */
+  69   1          seg_display_buf[num] = displaychar;
+  70   1      }
+  71          
+  72          void AllSeg_Print(unsigned char* displaychars){
+  73   1          /*
+  74   1           * description:
+  75   1           *  8位数码管全显示修改
+  76   1           * parameter:
+  77   1           *  displaychars: 显示字符的编码数组，长度为8
+  78   1           */
+  79   1          seg_display_buf[7] = displaychars[7];
+  80   1          seg_display_buf[6] = displaychars[6];
+  81   1          seg_display_buf[5] = displaychars[5];
+  82   1          seg_display_buf[4] = displaychars[4];
+  83   1          seg_display_buf[3] = displaychars[3];
+  84   1          seg_display_buf[2] = displaychars[2];
+  85   1          seg_display_buf[1] = displaychars[1];
+  86   1          seg_display_buf[0] = displaychars[0];
+  87   1      }
+  88          
+  89          void Led_Print(unsigned char displaychar){
+  90   1          led_display_buf = displaychar;
+  91   1      }
+  92          
+  93          void display_pos_next(){
+  94   1          /* 该函数应该被写入调度，不对外提供api */
+  95   1          if(display_pos < 7)
+  96   1              display_pos ++;
+  97   1          else
+  98   1              display_pos = 0;
+  99   1      }
+ 100          
+ 101          void segled_display(){
+ 102   1          P23 = ~P23;
+ 103   1          if(P23 == 0){
+ 104   2              P0 = seg_display_buf[display_pos];
+ 105   2              P20 = display_pos & 0x1;
+ 106   2              P21 = (display_pos & 0x2) >> 1;
+ 107   2              P22 = (display_pos & 0x4) >> 2;
+ 108   2          }
+ 109   1          else{
+ 110   2              P0 = led_display_buf;
+ 111   2          }
+ 112   1      }
+ 113          
+ 114          #define MAIN_Fosc       11059200L
+ 115          #define Main_Fosc_KHZ (MAIN_Fosc / 1000)
+C51 COMPILER V9.51   MAIN                                                                  10/13/2022 00:17:01 PAGE 3   
+
+ 116          #define TIMESLICE_MS  1
+ 117          #define Fosc_1ms        (65536 - MAIN_Fosc*TIMESLICE_MS/12/1000)
+ 118          
+ 119          unsigned int timer_count = 0;
+ 120          
+ 121          void Timer0_Init(){
+ 122   1          // p498
+ 123   1          timer_count = 0;
+ 124   1          TR0 = 0;    // 停止timer0
+ 125   1          TMOD &= 0xF0;   // timer0 mode设置为(xxxx0000b, .3:0 打开定时/计数器 .2:0 选择定时模式
+             - .1-0:00 16位自动重装定时器)
+ 126   1          AUXR &= 0x7F;   // 定时器0用传统8051速度，12分频（？）
+ 127   1          TH0 = (Fosc_1ms & 0xff00) >> 8;  TL0 = Fosc_1ms & 0xff;     // 设置定时器
+ 128   1          ET0 = EA = 1;   // 启用timer0中断
+ 129   1        PT0 = 1;    // 设置高优先级（在C51中timer0本身优先级为第二，设为1基本上是最高了�
+             -��
+ 130   1        TR0 = 1;        // 启用timer0
+ 131   1      }
+ 132          
+ 133          void Timer0_Rountine() interrupt 1{
+ 134   1          if(P23 == 1)
+ 135   1              display_pos_next();
+ 136   1          segled_display();
+ 137   1      
+ 138   1          if(timer_count % 10 == 0){}
+ 139   1          if(timer_count % 100 == 0){
+ 140   2              // 流水灯测试
+ 141   2              leftbit = (ledtest >> 7) & 1;
+ 142   2              ledtest <<= 1;
+ 143   2              ledtest |= leftbit;
+ 144   2              Led_Print(ledtest);
+ 145   2          }
+ 146   1          if(timer_count == 0){}
+ 147   1      
+ 148   1          timer_count ++;
+ 149   1          if(timer_count >= 1000)
+ 150   1              timer_count = 0;
+ 151   1          // TH0 = (Fosc_1ms & 0xff00) >> 8;  TL0 = Fosc_1ms & 0xff;     // 重置定时器（16位自动重载�
+             -��，不需要 文档P499
+ 152   1      }
+ 153          
+ 154          unsigned char hello[8] = {0x76, 0x79, 0x38, 0x38, 0x5c, 0, 0, 0};
+ 155          
+ 156          int main(){
+ 157   1          Seg_Led_Init();
+ 158   1          Timer0_Init();
+ 159   1          AllSeg_Print(hello);
+ 160   1          Led_Print(0);
+ 161   1      
+ 162   1          while(1);
+ 163   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    302    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     22    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+C51 COMPILER V9.51   MAIN                                                                  10/13/2022 00:17:01 PAGE 4   
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,24 @@
+<html>
+<body>
+<pre>
+<h1>µVision Build Log</h1>
+<h2>Project:</h2>
+C:\Users\ggp\Desktop\trytryC51\stc-b-bsptry.uvproj
+Project File Date:  10/12/2022
+
+<h2>Output:</h2>
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling main.c...
+linking...
+*** WARNING L1: UNRESOLVED EXTERNAL SYMBOL
+    SYMBOL:  MAIN
+    MODULE:  C:\KEIL\C51\LIB\C51S.LIB (?C_INIT)
+*** WARNING L2: REFERENCE MADE TO UNRESOLVED EXTERNAL
+    SYMBOL:  MAIN
+    MODULE:  C:\KEIL\C51\LIB\C51S.LIB (?C_INIT)
+    ADDRESS: 0010H
+Program Size: data=9.0 xdata=0 code=144
+"stc-b-bsptry" - 0 Error(s), 2 Warning(s).
+Clean started: Project: 'stc-b-bsptry'
+   deleting intermediate output files for target 'Target 1'

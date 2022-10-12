@@ -1,0 +1,8 @@
+dist/
+STC-B-OS/
+docs/
+.vscode/
+*.bak
+*.uvgui.*
+*.uvopt
+*.exe
