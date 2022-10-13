@@ -7,10 +7,6 @@
 
 // 以上用不用的到不知道，反正先放着
 
-// debug
-unsigned char ledtest = 0x0f;
-unsigned char leftbit = 0;
-
 // seg & led 寄存器备注说明
 /*
  * P0: P07 - P00 高电平有效
@@ -130,20 +126,35 @@ void Timer0_Init(){
 	TR0 = 1;        // 启用timer0
 }
 
+#define enumEvent_1ms 0
+#define enumEvent_10ms 1
+#define enumEvent_100ms 2
+#define enumEvent_1s 3
+typedef void (*EventCallback)(void);
+EventCallback CallbackFor1ms = NULL;
+EventCallback CallbackFor10ms = NULL;
+EventCallback CallbackFor100ms = NULL;
+EventCallback CallbackFor1s = NULL;
+
+void SetEventCallback(unsigned char event_interrupt_api, void (*fp)()){
+    switch(event_interrupt_api){
+        case 0: CallbackFor1ms = fp; break;
+        case 1: CallbackFor10ms = fp; break;
+        case 2: CallbackFor100ms = fp; break;
+        case 3: CallbackFor1s = fp; break;
+        default: break;
+    }
+}
+
 void Timer0_Rountine() interrupt 1{
     if(P23 == 1)
         display_pos_next();
     segled_display();
 
-    if(timer_count % 10 == 0){}
-    if(timer_count % 100 == 0){
-        // 流水灯测试
-        leftbit = (ledtest >> 7) & 1;
-        ledtest <<= 1;
-        ledtest |= leftbit;
-        Led_Print(ledtest);
-    }
-    if(timer_count == 0){}
+    if(CallbackFor1ms != NULL)CallbackFor1ms();   
+    if(timer_count % 10 == 0 && CallbackFor10ms != NULL){CallbackFor10ms();}
+    if(timer_count % 100 == 0 && CallbackFor100ms != NULL){CallbackFor100ms();}
+    if(timer_count == 0 && CallbackFor1s != NULL){CallbackFor1s();}
 
     timer_count ++;
     if(timer_count >= 1000)
@@ -151,6 +162,16 @@ void Timer0_Rountine() interrupt 1{
     // TH0 = (Fosc_1ms & 0xff00) >> 8;  TL0 = Fosc_1ms & 0xff;     // 重置定时器（16位自动重载了，不需要 文档P499
 }
 
+// debug
+unsigned char ledtest = 0x0f;
+unsigned char leftbit = 0;
+void waterled(){
+    // 流水灯测试
+        leftbit = (ledtest >> 7) & 1;
+        ledtest <<= 1;
+        ledtest |= leftbit;
+        Led_Print(ledtest);
+}
 unsigned char hello[8] = {0x76, 0x79, 0x38, 0x38, 0x5c, 0, 0, 0};
 
 int main(){
@@ -158,6 +179,9 @@ int main(){
     Timer0_Init();
     AllSeg_Print(hello);
     Led_Print(0);
+
+    // CallbackFor1s = waterled;
+    SetEventCallback(enumEvent_100ms, waterled);
 
     while(1);
 }
