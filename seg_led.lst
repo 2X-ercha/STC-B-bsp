@@ -1,0 +1,127 @@
+C51 COMPILER V9.51   SEG_LED                                                               10/13/2022 15:06:28 PAGE 1   
+
+
+C51 COMPILER V9.51, COMPILATION OF MODULE SEG_LED
+OBJECT MODULE PLACED IN .\dist\seg_led.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE src\seg_led.c BROWSE DEBUG OBJECTEXTEND PRINT(.\seg_led.lst) TABS(2) OBJECT
+                    -(.\dist\seg_led.obj)
+
+line level    source
+
+   1          #include "seg_led.h"
+   2          #include <STC15F2K60S2.H>
+   3          
+   4          // seg & led 寄存器备注说明
+   5          /*
+   6           * P0: P07 - P00 高电平有效
+   7           * 功能1：数码管单个段选
+   8           *      管脚编码位：（小数点为8)
+   9           *     ----    0
+  10           *    |    |     5   1
+  11           *     ----      6
+  12           *    |    |     4   2
+  13           *     ---- -    5   7
+  14           *      管脚对应寄存器即为 P00 - P07
+  15           * 功能2: led灯选择（刚好8个，从左往右 P07 - P00 ）
+  16           * 
+  17           * P2:
+  18           *  P22 - P20
+  19           *      选择第n个数码管点亮（高速循环来完成视觉暂留）
+  20           *  P23 （注 E3 连接到数码管中）
+  21           *      设为0则数码管显示，设为1则led显示
+  22           */
+  23          /*
+  24           * 推挽等寄存器初始化相关
+  25           * P0: （芯片数据手册 p324）
+  26           *  例如：（00：准双向口    01：推挽输出    10：仅为输入    11：开漏（可读可写�
+             -��
+  27           *          P07     P06     P05     P04     P03     P02     P01     P00
+  28           *  P0M1:   1       0       1       0       0       0       0       0
+  29           *  P0M0:   1       1       0       0       0       0       0       0
+  30           *          开漏    推挽    输入     准双向    
+  31           * 
+  32           * P2: （芯片数据手册 p323）
+  33           *  同上
+  34           * 这里对于seg和led而言，显然只需要设为推挽输出即可
+  35           */
+  36          
+  37          data unsigned char seg_display_buf[8] = {0,0,0,0,0,0,0,0};   // 存储各个数码管显示位的具体值
+  38          data unsigned char led_display_buf = 0;      // 存储led显示值
+  39          data unsigned char display_pos = 0;
+  40          
+  41          void Seg_Led_Init(){
+  42   1          // P0、P2口全部设为推挽输出
+  43   1          P0M1 = 0x00;
+  44   1          P0M0 = 0xff;
+  45   1          P2M1 &= 0xf0;
+  46   1          P2M0 |= 0x0f;
+  47   1      }
+  48          
+  49          void OneSeg_Print(unsigned char num, unsigned char displaychar){
+  50   1          /*
+  51   1           * description:
+  52   1           *  单字符数码管显示修改
+  53   1           * parameter:
+C51 COMPILER V9.51   SEG_LED                                                               10/13/2022 15:06:28 PAGE 2   
+
+  54   1           *  num: 修改的目标数码管编号，从左到右依次为 0-7
+  55   1           *  displaychar: 修改后显示的字符 
+  56   1           */
+  57   1          seg_display_buf[num] = displaychar;
+  58   1      }
+  59          
+  60          void AllSeg_Print(unsigned char* displaychars){
+  61   1          /*
+  62   1           * description:
+  63   1           *  8位数码管全显示修改
+  64   1           * parameter:
+  65   1           *  displaychars: 显示字符的编码数组，长度为8
+  66   1           */
+  67   1          seg_display_buf[7] = displaychars[7];
+  68   1          seg_display_buf[6] = displaychars[6];
+  69   1          seg_display_buf[5] = displaychars[5];
+  70   1          seg_display_buf[4] = displaychars[4];
+  71   1          seg_display_buf[3] = displaychars[3];
+  72   1          seg_display_buf[2] = displaychars[2];
+  73   1          seg_display_buf[1] = displaychars[1];
+  74   1          seg_display_buf[0] = displaychars[0];
+  75   1      }
+  76          
+  77          void Led_Print(unsigned char displaychar){
+  78   1          led_display_buf = displaychar;
+  79   1      }
+  80          
+  81          void display_pos_next(){
+  82   1          /* 该函数应该被写入调度，不对外提供api */
+  83   1          if(display_pos < 7)
+  84   1              display_pos ++;
+  85   1          else
+  86   1              display_pos = 0;
+  87   1      }
+  88          
+  89          void segled_display(){
+  90   1          P23 = ~P23;
+  91   1          if(P23 == 0){
+  92   2              P0 = seg_display_buf[display_pos];
+  93   2              P20 = display_pos & 0x1;
+  94   2              P21 = (display_pos & 0x2) >> 1;
+  95   2              P22 = (display_pos & 0x4) >> 2;
+  96   2          }
+  97   1          else{
+  98   2              P0 = led_display_buf;
+  99   2          }
+ 100   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    144    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     10    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

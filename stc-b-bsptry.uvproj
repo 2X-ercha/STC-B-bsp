@@ -370,6 +370,26 @@
               <FileType>5</FileType>
               <FilePath>.\src\STC15F2K60S2.H</FilePath>
             </File>
+            <File>
+              <FileName>seg_led.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\seg_led.c</FilePath>
+            </File>
+            <File>
+              <FileName>seg_led.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\src\seg_led.h</FilePath>
+            </File>
+            <File>
+              <FileName>timer0.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\timer0.c</FilePath>
+            </File>
+            <File>
+              <FileName>timer0.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\src\timer0.h</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>

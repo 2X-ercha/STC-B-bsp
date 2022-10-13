@@ -1,4 +1,4 @@
-C51 COMPILER V9.51   MAIN                                                                  10/13/2022 11:05:22 PAGE 1   
+C51 COMPILER V9.51   MAIN                                                                  10/13/2022 15:30:55 PAGE 1   
 
 
 C51 COMPILER V9.51, COMPILATION OF MODULE MAIN
@@ -17,202 +17,42 @@ line level    source
    7          
    8          // 以上用不用的到不知道，反正先放着
    9          
-  10          // seg & led 寄存器备注说明
-  11          /*
-  12           * P0: P07 - P00 高电平有效
-  13           * 功能1：数码管单个段选
-  14           *      管脚编码位：（小数点为8)
-  15           *     ----    0
-  16           *    |    |     5   1
-  17           *     ----      6
-  18           *    |    |     4   2
-  19           *     ---- -    5   7
-  20           *      管脚对应寄存器即为 P00 - P07
-  21           * 功能2: led灯选择（刚好8个，从左往右 P07 - P00 ）
-  22           * 
-  23           * P2:
-  24           *  P22 - P20
-  25           *      选择第n个数码管点亮（高速循环来完成视觉暂留）
-  26           *  P23 （注 E3 连接到数码管中）
-  27           *      设为0则数码管显示，设为1则led显示
-  28           */
-  29          
-  30          /*
-  31           * 推挽等寄存器初始化相关
-  32           * P0: （芯片数据手册 p324）
-  33           *  例如：（00：准双向口    01：推挽输出    10：仅为输入    11：开漏（可读可写�
-             -��
-  34           *          P07     P06     P05     P04     P03     P02     P01     P00
-  35           *  P0M1:   1       0       1       0       0       0       0       0
-  36           *  P0M0:   1       1       0       0       0       0       0       0
-  37           *          开漏    推挽    输入     准双向    
-  38           * 
-  39           * P2: （芯片数据手册 p323）
-  40           *  同上
-  41           * 这里对于seg和led而言，显然只需要设为推挽输出即可
-  42           */
-  43          
-  44          unsigned char seg_display_buf[8] = {0,0,0,0,0,0,0,0};    // 存储各个数码管显示位的具体值
-  45          unsigned char led_display_buf = 0;                       // 存储led显示值
-  46          
-  47          unsigned char display_pos = 0;
-  48          
-  49          void Seg_Led_Init(){
-  50   1          // P0、P2口全部设为推挽输出
-  51   1          P0M1 = 0x00;
-  52   1          P0M0 = 0xff;
-  53   1          P2M1 &= 0xf0;
-C51 COMPILER V9.51   MAIN                                                                  10/13/2022 11:05:22 PAGE 2   
-
-  54   1          P2M0 |= 0x0f;
-  55   1      }
-  56          
-  57          void OneSeg_Print(unsigned char num, unsigned char displaychar){
-  58   1          /*
-  59   1           * description:
-  60   1           *  单字符数码管显示修改
-  61   1           * parameter:
-  62   1           *  num: 修改的目标数码管编号，从左到右依次为 0-7
-  63   1           *  displaychar: 修改后显示的字符 
-  64   1           */
-  65   1          seg_display_buf[num] = displaychar;
-  66   1      }
-  67          
-  68          void AllSeg_Print(unsigned char* displaychars){
-  69   1          /*
-  70   1           * description:
-  71   1           *  8位数码管全显示修改
-  72   1           * parameter:
-  73   1           *  displaychars: 显示字符的编码数组，长度为8
-  74   1           */
-  75   1          seg_display_buf[7] = displaychars[7];
-  76   1          seg_display_buf[6] = displaychars[6];
-  77   1          seg_display_buf[5] = displaychars[5];
-  78   1          seg_display_buf[4] = displaychars[4];
-  79   1          seg_display_buf[3] = displaychars[3];
-  80   1          seg_display_buf[2] = displaychars[2];
-  81   1          seg_display_buf[1] = displaychars[1];
-  82   1          seg_display_buf[0] = displaychars[0];
-  83   1      }
-  84          
-  85          void Led_Print(unsigned char displaychar){
-  86   1          led_display_buf = displaychar;
-  87   1      }
-  88          
-  89          void display_pos_next(){
-  90   1          /* 该函数应该被写入调度，不对外提供api */
-  91   1          if(display_pos < 7)
-  92   1              display_pos ++;
-  93   1          else
-  94   1              display_pos = 0;
-  95   1      }
-  96          
-  97          void segled_display(){
-  98   1          P23 = ~P23;
-  99   1          if(P23 == 0){
- 100   2              P0 = seg_display_buf[display_pos];
- 101   2              P20 = display_pos & 0x1;
- 102   2              P21 = (display_pos & 0x2) >> 1;
- 103   2              P22 = (display_pos & 0x4) >> 2;
- 104   2          }
- 105   1          else{
- 106   2              P0 = led_display_buf;
- 107   2          }
- 108   1      }
- 109          
- 110          #define MAIN_Fosc       11059200L
- 111          #define Main_Fosc_KHZ (MAIN_Fosc / 1000)
- 112          #define TIMESLICE_MS  1
- 113          #define Fosc_1ms        (65536 - MAIN_Fosc*TIMESLICE_MS/12/1000)
- 114          
- 115          unsigned int timer_count = 0;
-C51 COMPILER V9.51   MAIN                                                                  10/13/2022 11:05:22 PAGE 3   
-
- 116          
- 117          void Timer0_Init(){
- 118   1          // p498
- 119   1          timer_count = 0;
- 120   1          TR0 = 0;    // 停止timer0
- 121   1          TMOD &= 0xF0;   // timer0 mode设置为(xxxx0000b, .3:0 打开定时/计数器 .2:0 选择定时模式
-             - .1-0:00 16位自动重装定时器)
- 122   1          AUXR &= 0x7F;   // 定时器0用传统8051速度，12分频（？）
- 123   1          TH0 = (Fosc_1ms & 0xff00) >> 8;  TL0 = Fosc_1ms & 0xff;     // 设置定时器
- 124   1          ET0 = EA = 1;   // 启用timer0中断
- 125   1        PT0 = 1;    // 设置高优先级（在C51中timer0本身优先级为第二，设为1基本上是最高了�
-             -��
- 126   1        TR0 = 1;        // 启用timer0
- 127   1      }
- 128          
- 129          #define enumEvent_1ms 0
- 130          #define enumEvent_10ms 1
- 131          #define enumEvent_100ms 2
- 132          #define enumEvent_1s 3
- 133          typedef void (*EventCallback)(void);
- 134          EventCallback CallbackFor1ms = NULL;
- 135          EventCallback CallbackFor10ms = NULL;
- 136          EventCallback CallbackFor100ms = NULL;
- 137          EventCallback CallbackFor1s = NULL;
- 138          
- 139          void SetEventCallback(unsigned char event_interrupt_api, void (*fp)()){
- 140   1          switch(event_interrupt_api){
- 141   2              case 0: CallbackFor1ms = fp; break;
- 142   2              case 1: CallbackFor10ms = fp; break;
- 143   2              case 2: CallbackFor100ms = fp; break;
- 144   2              case 3: CallbackFor1s = fp; break;
- 145   2              default: break;
- 146   2          }
- 147   1      }
- 148          
- 149          void Timer0_Rountine() interrupt 1{
- 150   1          if(P23 == 1)
- 151   1              display_pos_next();
- 152   1          segled_display();
- 153   1      
- 154   1          if(CallbackFor1ms != NULL)CallbackFor1ms();   
- 155   1          if(timer_count % 10 == 0 && CallbackFor10ms != NULL){CallbackFor10ms();}
- 156   1          if(timer_count % 100 == 0 && CallbackFor100ms != NULL){CallbackFor100ms();}
- 157   1          if(timer_count == 0 && CallbackFor1s != NULL){CallbackFor1s();}
- 158   1      
- 159   1          timer_count ++;
- 160   1          if(timer_count >= 1000)
- 161   1              timer_count = 0;
- 162   1          // TH0 = (Fosc_1ms & 0xff00) >> 8;  TL0 = Fosc_1ms & 0xff;     // 重置定时器（16位自动重载�
-             -��，不需要 文档P499
- 163   1      }
- 164          
- 165          // debug
- 166          unsigned char ledtest = 0x0f;
- 167          unsigned char leftbit = 0;
- 168          void waterled(){
- 169   1          // 流水灯测试
- 170   1              leftbit = (ledtest >> 7) & 1;
- 171   1              ledtest <<= 1;
- 172   1              ledtest |= leftbit;
- 173   1              Led_Print(ledtest);
- 174   1      }
-C51 COMPILER V9.51   MAIN                                                                  10/13/2022 11:05:22 PAGE 4   
-
- 175          unsigned char hello[8] = {0x76, 0x79, 0x38, 0x38, 0x5c, 0, 0, 0};
- 176          
- 177          int main(){
- 178   1          Seg_Led_Init();
- 179   1          Timer0_Init();
- 180   1          AllSeg_Print(hello);
- 181   1          Led_Print(0);
- 182   1      
- 183   1          // CallbackFor1s = waterled;
- 184   1          SetEventCallback(enumEvent_100ms, waterled);
- 185   1      
- 186   1          while(1);
- 187   1      }
+  10          #include "bsp_global.h"
+  11          #include "callback.h"
+  12          #include "timer0.h"
+  13          #include "seg_led.h"
+  14          
+  15          // debug
+  16          unsigned char ledtest = 0x0f;
+  17          unsigned char leftbit = 0;
+  18          void waterled(){
+  19   1          // 流水灯测试
+  20   1          leftbit = (ledtest >> 7) & 1;
+  21   1          ledtest <<= 1;
+  22   1          ledtest |= leftbit;
+  23   1          Led_Print(ledtest);
+  24   1      }
+  25          unsigned char hello[8] = {0x76, 0x79, 0x38, 0x38, 0x5c, 0, 0, 0};
+  26          
+  27          int main(){
+  28   1          Seg_Led_Init();
+  29   1          Timer0_Init();
+  30   1          AllSeg_Print(hello);
+  31   1          Led_Print(0);
+  32   1      
+  33   1          CallbackFor100ms = waterled;
+  34   1          // SetEventCallback(enumEvent_100ms, waterled);
+  35   1      
+  36   1          while(1);
+  37   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    456    ----
+   CODE SIZE        =     56    ----
    CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----
-   DATA SIZE        =     34    ----
+   DATA SIZE        =     22    ----
    IDATA SIZE       =   ----    ----
    BIT SIZE         =   ----    ----
 END OF MODULE INFORMATION.
