@@ -1,10 +1,10 @@
-C51 COMPILER V9.51   SEG_LED                                                               10/13/2022 15:06:28 PAGE 1   
+C51 COMPILER V9.51   SEG_LED                                                               10/13/2022 16:26:45 PAGE 1   
 
 
 C51 COMPILER V9.51, COMPILATION OF MODULE SEG_LED
 OBJECT MODULE PLACED IN .\dist\seg_led.obj
-COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE src\seg_led.c BROWSE DEBUG OBJECTEXTEND PRINT(.\seg_led.lst) TABS(2) OBJECT
-                    -(.\dist\seg_led.obj)
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE src\seg_led.c OMF2 BROWSE DEBUG PRINT(.\seg_led.lst) TABS(2) OBJECT(.\dist\
+                    -seg_led.obj)
 
 line level    source
 
@@ -62,7 +62,7 @@ line level    source
   51   1           * description:
   52   1           *  单字符数码管显示修改
   53   1           * parameter:
-C51 COMPILER V9.51   SEG_LED                                                               10/13/2022 15:06:28 PAGE 2   
+C51 COMPILER V9.51   SEG_LED                                                               10/13/2022 16:26:45 PAGE 2   
 
   54   1           *  num: 修改的目标数码管编号，从左到右依次为 0-7
   55   1           *  displaychar: 修改后显示的字符 
@@ -121,7 +121,13 @@ MODULE INFORMATION:   STATIC OVERLAYABLE
    DATA SIZE        =     10    ----
    IDATA SIZE       =   ----    ----
    BIT SIZE         =   ----    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
 END OF MODULE INFORMATION.
+
+C51 COMPILER V9.51   SEG_LED                                                               10/13/2022 16:26:45 PAGE 3   
 
 
 C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,15 +1,15 @@
-C51 COMPILER V9.51   TIMER0                                                                10/13/2022 15:32:41 PAGE 1   
+C51 COMPILER V9.51   TIMER0                                                                10/13/2022 16:26:45 PAGE 1   
 
 
 C51 COMPILER V9.51, COMPILATION OF MODULE TIMER0
 OBJECT MODULE PLACED IN .\dist\timer0.obj
-COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE src\timer0.c BROWSE DEBUG OBJECTEXTEND PRINT(.\timer0.lst) TABS(2) OBJECT(.
-                    -\dist\timer0.obj)
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE src\timer0.c OMF2 BROWSE DEBUG PRINT(.\timer0.lst) TABS(2) OBJECT(.\dist\ti
+                    -mer0.obj)
 
 line level    source
 
    1          #include <STC15F2K60S2.H>
-   2          // #include "callback.h"
+   2          #include "callback.h"
    3          #include <stdlib.h>
    4          #include "timer0.h"
    5          #include "seg_led.h"
@@ -35,29 +35,31 @@ line level    source
   23   1              display_pos_next();
   24   1          segled_display();
   25   1          
-  26   1          /*
-  27   1          if(CallbackFor1ms != NULL)CallbackFor1ms();   
-  28   1          if(timer_count % 10 == 0 && CallbackFor10ms != NULL){CallbackFor10ms();}
-  29   1          if(timer_count % 100 == 0 && CallbackFor100ms != NULL){CallbackFor100ms();}
-  30   1          if(timer_count == 0 && CallbackFor1s != NULL){CallbackFor1s();}
-  31   1          */
-  32   1      
-  33   1          timer_count ++;
-  34   1          if(timer_count >= 1000)
-  35   1              timer_count = 0;
-  36   1          // TH0 = (Fosc_1ms & 0xff00) >> 8;  TL0 = Fosc_1ms & 0xff;     // 重置定时器（16位自动重载�
+  26   1          if(CallbackFor1ms != NULL)CallbackFor1ms();   
+  27   1          if(timer_count % 10 == 0 && CallbackFor10ms != NULL){CallbackFor10ms();}
+  28   1          if(timer_count % 100 == 0 && CallbackFor100ms != NULL){CallbackFor100ms();}
+  29   1          if(timer_count == 0 && CallbackFor1s != NULL){CallbackFor1s();}
+  30   1      
+  31   1          timer_count ++;
+  32   1          if(timer_count >= 1000)
+  33   1              timer_count = 0;
+  34   1          // TH0 = (Fosc_1ms & 0xff00) >> 8;  TL0 = Fosc_1ms & 0xff;     // 重置定时器（16位自动重载�
              -��，不需要 文档P499
-  37   1      }
+  35   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    116    ----
+   CODE SIZE        =    215    ----
    CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----
    DATA SIZE        =      2    ----
    IDATA SIZE       =   ----    ----
    BIT SIZE         =   ----    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
 END OF MODULE INFORMATION.
 
 

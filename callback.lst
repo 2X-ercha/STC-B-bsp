@@ -1,0 +1,44 @@
+C51 COMPILER V9.51   CALLBACK                                                              10/13/2022 16:26:45 PAGE 1   
+
+
+C51 COMPILER V9.51, COMPILATION OF MODULE CALLBACK
+OBJECT MODULE PLACED IN .\dist\callback.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE src\callback.c OMF2 BROWSE DEBUG PRINT(.\callback.lst) TABS(2) OBJECT(.\dis
+                    -t\callback.obj)
+
+line level    source
+
+   1          #include "callback.h"
+   2          
+   3          EventCallback CallbackFor1ms = 0;
+   4          EventCallback CallbackFor10ms = 0;
+   5          EventCallback CallbackFor100ms = 0;
+   6          EventCallback CallbackFor1s = 0;
+   7          
+   8          void SetEventCallback(unsigned char event_interrupt_api, void (*fp)()){
+   9   1          switch(event_interrupt_api){
+  10   2              case 0: CallbackFor1ms = fp; break;
+  11   2              case 1: CallbackFor10ms = fp; break;
+  12   2              case 2: CallbackFor100ms = fp; break;
+  13   2              case 3: CallbackFor1s = fp; break;
+  14   2              default: break;
+  15   2          }
+  16   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     42    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     12    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

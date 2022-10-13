@@ -1,5 +1,5 @@
 #include <STC15F2K60S2.H>
-// #include "callback.h"
+#include "callback.h"
 #include <stdlib.h>
 #include "timer0.h"
 #include "seg_led.h"
@@ -23,12 +23,10 @@ void Timer0_Rountine() interrupt 1{
         display_pos_next();
     segled_display();
     
-    /*
     if(CallbackFor1ms != NULL)CallbackFor1ms();   
     if(timer_count % 10 == 0 && CallbackFor10ms != NULL){CallbackFor10ms();}
     if(timer_count % 100 == 0 && CallbackFor100ms != NULL){CallbackFor100ms();}
     if(timer_count == 0 && CallbackFor1s != NULL){CallbackFor1s();}
-    */
 
     timer_count ++;
     if(timer_count >= 1000)

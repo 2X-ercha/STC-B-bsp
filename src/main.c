@@ -1,14 +1,7 @@
 #include <STC15F2K60S2.H>
-#include <math.h>
-#include <intrins.h>    // 固有函数
-#include <absacc.h>     // 访问特殊功能寄存器（可能用不到）
-#include <stdio.h>      // 动态分配内存函数
-#include <stdlib.h>     // 标准库
-
-// 以上用不用的到不知道，反正先放着
 
 #include "bsp_global.h"
-// #include "callback.h"
+#include "callback.h"
 #include "timer0.h"
 #include "seg_led.h"
 
@@ -31,7 +24,7 @@ int main(){
     Led_Print(0);
 
     // CallbackFor100ms = waterled;
-    // SetEventCallback(enumEvent_100ms, waterled);
+    SetEventCallback(enumEvent_100ms, waterled);
 
     while(1);
 }
