@@ -1,4 +1,4 @@
-C51 COMPILER V9.51   CALLBACK                                                              10/13/2022 16:26:45 PAGE 1   
+C51 COMPILER V9.51   CALLBACK                                                              10/13/2022 20:30:32 PAGE 1   
 
 
 C51 COMPILER V9.51, COMPILATION OF MODULE CALLBACK
@@ -14,24 +14,32 @@ line level    source
    4          EventCallback CallbackFor10ms = 0;
    5          EventCallback CallbackFor100ms = 0;
    6          EventCallback CallbackFor1s = 0;
-   7          
-   8          void SetEventCallback(unsigned char event_interrupt_api, void (*fp)()){
-   9   1          switch(event_interrupt_api){
-  10   2              case 0: CallbackFor1ms = fp; break;
-  11   2              case 1: CallbackFor10ms = fp; break;
-  12   2              case 2: CallbackFor100ms = fp; break;
-  13   2              case 3: CallbackFor1s = fp; break;
-  14   2              default: break;
-  15   2          }
-  16   1      }
+   7          EventCallback CallbackForKey1Press = 0;
+   8          EventCallback CallbackForKey1Release = 0;
+   9          EventCallback CallbackForKey2Press = 0;
+  10          EventCallback CallbackForKey2Release = 0;
+  11          
+  12          void SetEventCallback(unsigned char event_interrupt_api, void (*fp)()){
+  13   1          switch(event_interrupt_api){
+  14   2              case enumEvent_1ms:             CallbackFor1ms = fp;            break;
+  15   2              case enumEvent_10ms:            CallbackFor10ms = fp;           break;
+  16   2              case enumEvent_100ms:           CallbackFor100ms = fp;          break;
+  17   2              case enumEvent_1s:              CallbackFor1s = fp;             break;
+  18   2              case enumEvent_Key1_Press:      CallbackForKey1Press = fp;      break;
+  19   2              case enumEvent_key1_Release:    CallbackForKey1Release = fp;    break;
+  20   2              case enumEvent_Key2_Press:      CallbackForKey2Press = fp;      break;
+  21   2              case enumEvent_key2_Release:    CallbackForKey2Release = fp;    break;
+  22   2              default: break;
+  23   2          }
+  24   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =     42    ----
+   CODE SIZE        =     93    ----
    CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----
-   DATA SIZE        =     12    ----
+   DATA SIZE        =     24    ----
    IDATA SIZE       =   ----    ----
    BIT SIZE         =   ----    ----
    EDATA SIZE       =   ----    ----

@@ -1,0 +1,75 @@
+C51 COMPILER V9.51   BUTTON                                                                10/14/2022 14:39:56 PAGE 1   
+
+
+C51 COMPILER V9.51, COMPILATION OF MODULE BUTTON
+OBJECT MODULE PLACED IN .\dist\button.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE src\button.c OMF2 BROWSE DEBUG PRINT(.\button.lst) TABS(2) OBJECT(.\dist\bu
+                    -tton.obj)
+
+line level    source
+
+   1          #include <STC15F2K60S2.H>
+   2          #include "button.h"
+   3          #include "callback.h"
+   4          
+   5          // 按键key与adc导航备注说明
+   6          /* key1 - P32 - INT0
+   7           * key2 - P33 - INT1
+   8           * 均设置为输入
+   9           */
+  10          
+  11          void Button_Init(){
+  12   1          EX1 = EX0 = EA = 1;
+  13   1          PX0 = PX1 = 0;
+  14   1          IE0 = IE1 = 0;          // 清除中断标志位
+  15   1          IT0 = IT1 = 0;          // 0上下降沿均触发，1下降沿触发
+  16   1          P3M1 |= 0x0c;
+  17   1          P3M0 &= 0xf3;
+  18   1      }
+  19          
+  20          void Int0_Routine() interrupt 0
+  21          {   
+  22   1          /*
+  23   1          if(P32 == enumKeyStatus_Press && CallbackForKey1Press != 0){CallbackForKey1Press();}
+  24   1          else if(P32 == enumKeyStatus_Release && CallbackForKey1Release != 0){CallbackForKey1Release();}
+  25   1          */
+  26   1          if(P32 == enumKeyStatus_Press && CallbackForKey1Press != 0){
+  27   2              k1_press_flag = 1;
+  28   2              k1_press_timing = 0;
+  29   2          }
+  30   1          else if(P32 == enumKeyStatus_Release && CallbackForKey1Release != 0){
+  31   2              k1_release_flag = 1;
+  32   2              k1_release_timing = 0;
+  33   2          }
+  34   1      }
+  35          
+  36          void Int1_Routine() interrupt 2{
+  37   1          if(P33 == enumKeyStatus_Press && CallbackForKey2Press != 0){
+  38   2              k2_press_flag = 1;
+  39   2              k2_press_timing = 0;
+  40   2          }
+  41   1          else if(P33 == enumKeyStatus_Release && CallbackForKey2Release != 0){
+  42   2              k2_release_flag = 1;
+  43   2              k2_release_timing = 0;
+  44   2          }
+  45   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    105    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+C51 COMPILER V9.51   BUTTON                                                                10/14/2022 14:39:56 PAGE 2   
+
+   BIT SIZE         =   ----    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

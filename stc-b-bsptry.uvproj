@@ -405,6 +405,16 @@
               <FileType>5</FileType>
               <FilePath>.\src\callback.h</FilePath>
             </File>
+            <File>
+              <FileName>button.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\button.c</FilePath>
+            </File>
+            <File>
+              <FileName>button.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\src\button.h</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>

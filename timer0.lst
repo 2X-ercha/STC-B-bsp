@@ -1,4 +1,4 @@
-C51 COMPILER V9.51   TIMER0                                                                10/13/2022 16:26:45 PAGE 1   
+C51 COMPILER V9.51   TIMER0                                                                10/14/2022 14:41:09 PAGE 1   
 
 
 C51 COMPILER V9.51, COMPILATION OF MODULE TIMER0
@@ -10,50 +10,98 @@ line level    source
 
    1          #include <STC15F2K60S2.H>
    2          #include "callback.h"
-   3          #include <stdlib.h>
-   4          #include "timer0.h"
-   5          #include "seg_led.h"
+   3          #include "timer0.h"
+   4          #include "seg_led.h"
+   5          #include "button.h"
    6          
    7          unsigned int timer_count = 0;
-   8          
-   9          void Timer0_Init(){
-  10   1          // p498
-  11   1          timer_count = 0;
-  12   1          TR0 = 0;    // 停止timer0
-  13   1          TMOD &= 0xF0;   // timer0 mode设置为(xxxx0000b, .3:0 打开定时/计数器 .2:0 选择定时模式
+   8          unsigned char k1_press_flag = 0;
+   9          unsigned char k2_press_flag = 0;
+  10          unsigned char k1_press_timing = 0;
+  11          unsigned char k2_press_timing = 0;
+  12          unsigned char k1_release_flag = 0;
+  13          unsigned char k2_release_flag = 0;
+  14          unsigned char k1_release_timing = 0;
+  15          unsigned char k2_release_timing = 0;
+  16          
+  17          void Timer0_Init(){
+  18   1          // p498
+  19   1          timer_count = 0;
+  20   1          TR0 = 0;        // 停止timer0
+  21   1          TMOD &= 0xF0;   // timer0 mode设置为(xxxx0000b, .3:0 打开定时/计数器 .2:0 选择定时模式
              - .1-0:00 16位自动重装定时器)
-  14   1          AUXR &= 0x7F;   // 定时器0用传统8051速度，12分频（？）
-  15   1          TH0 = (Fosc_1ms & 0xff00) >> 8;  TL0 = Fosc_1ms & 0xff;     // 设置定时器
-  16   1          ET0 = EA = 1;   // 启用timer0中断
-  17   1        PT0 = 1;    // 设置高优先级（在C51中timer0本身优先级为第二，设为1基本上是最高了�
+  22   1          AUXR &= 0x7F;   // 定时器0用传统8051速度，12分频
+  23   1          TH0 = (Fosc_1ms & 0xff00) >> 8;  TL0 = Fosc_1ms & 0xff;     // 设置定时器
+  24   1          ET0 = EA = 1;   // 启用timer0中断
+  25   1        PT0 = 1;    // 设置高优先级（在C51中timer0本身优先级为第二，设为1基本上是最高了�
              -��
-  18   1        TR0 = 1;        // 启用timer0
-  19   1      }
-  20          
-  21          void Timer0_Rountine() interrupt 1{
-  22   1          if(P23 == 1)
-  23   1              display_pos_next();
-  24   1          segled_display();
-  25   1          
-  26   1          if(CallbackFor1ms != NULL)CallbackFor1ms();   
-  27   1          if(timer_count % 10 == 0 && CallbackFor10ms != NULL){CallbackFor10ms();}
-  28   1          if(timer_count % 100 == 0 && CallbackFor100ms != NULL){CallbackFor100ms();}
-  29   1          if(timer_count == 0 && CallbackFor1s != NULL){CallbackFor1s();}
-  30   1      
-  31   1          timer_count ++;
-  32   1          if(timer_count >= 1000)
-  33   1              timer_count = 0;
-  34   1          // TH0 = (Fosc_1ms & 0xff00) >> 8;  TL0 = Fosc_1ms & 0xff;     // 重置定时器（16位自动重载�
+  26   1          TF0 = 0;    // 清除TF0标志
+  27   1        TR0 = 1;        // 启用timer0
+  28   1      }
+  29          
+  30          void Timer0_Rountine() interrupt 1{
+  31   1          if(P23 == 1)
+  32   1              display_pos_next();
+  33   1          segled_display();
+  34   1          
+  35   1          // 时间回调
+  36   1          if(CallbackFor1ms != 0)CallbackFor1ms();   
+  37   1          if(timer_count % 10 == 0 && CallbackFor10ms != 0){CallbackFor10ms();}
+  38   1          if(timer_count % 100 == 0 && CallbackFor100ms != 0){CallbackFor100ms();}
+  39   1          if(timer_count == 0 && CallbackFor1s != 0){CallbackFor1s();}
+  40   1      
+  41   1          // 时间回调计时flag
+  42   1          timer_count ++;
+  43   1          if(timer_count >= 1000)
+  44   1              timer_count = 0;
+  45   1      
+  46   1          // 按键防抖
+  47   1          if(k1_press_flag == 1){
+  48   2              // k1按下
+  49   2              if(k1_press_timing < KEY_ANTISHAKE_MS) k1_press_timing++;
+  50   2              else if(CallbackForKey1Press != 0 && P32 == enumKeyStatus_Press){
+  51   3                  k1_press_flag = 0;
+  52   3                  CallbackForKey1Press();
+C51 COMPILER V9.51   TIMER0                                                                10/14/2022 14:41:09 PAGE 2   
+
+  53   3              }
+  54   2          }
+  55   1          if(k1_release_flag == 1){
+  56   2              // k1松开
+  57   2              if(k1_release_timing < KEY_ANTISHAKE_MS) k1_release_timing++;
+  58   2              else if(CallbackForKey1Release != 0 && P32 == enumKeyStatus_Release){
+  59   3                  k1_release_flag = 0;
+  60   3                  CallbackForKey1Release();
+  61   3              }
+  62   2          }
+  63   1          if(k2_press_flag == 1){
+  64   2              // k2按下
+  65   2              if(k2_press_timing < KEY_ANTISHAKE_MS) k2_press_timing++;
+  66   2              else if(CallbackForKey2Press != 0 && P33 == enumKeyStatus_Press){
+  67   3                  k2_press_flag = 0;
+  68   3                  CallbackForKey2Press();
+  69   3              }
+  70   2          }
+  71   1          if(k2_release_flag == 1){
+  72   2              // k2松开
+  73   2              if(k2_release_timing < KEY_ANTISHAKE_MS) k2_release_timing++;
+  74   2              else if(CallbackForKey2Release != 0 && P33 == enumKeyStatus_Release){
+  75   3                  k2_release_flag = 0;
+  76   3                  CallbackForKey2Release();
+  77   3              }
+  78   2          }
+  79   1      
+  80   1          // TH0 = (Fosc_1ms & 0xff00) >> 8;  TL0 = Fosc_1ms & 0xff;     // 重置定时器（16位自动重载�
              -��，不需要 文档P499
-  35   1      }
+  81   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    215    ----
+   CODE SIZE        =    365    ----
    CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----
-   DATA SIZE        =      2    ----
+   DATA SIZE        =     10    ----
    IDATA SIZE       =   ----    ----
    BIT SIZE         =   ----    ----
    EDATA SIZE       =   ----    ----
