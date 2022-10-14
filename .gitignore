@@ -6,3 +6,6 @@ docs/
 *.uvgui.*
 *.uvopt
 *.exe
+*.lst
+*.m51
+*.map
