@@ -415,6 +415,26 @@
               <FileType>5</FileType>
               <FilePath>.\src\button.h</FilePath>
             </File>
+            <File>
+              <FileName>scheduler.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\scheduler.c</FilePath>
+            </File>
+            <File>
+              <FileName>scheduler.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\src\scheduler.h</FilePath>
+            </File>
+            <File>
+              <FileName>sm.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\sm.c</FilePath>
+            </File>
+            <File>
+              <FileName>sm.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\src\sm.h</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>
