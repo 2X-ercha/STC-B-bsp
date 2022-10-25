@@ -55,10 +55,7 @@ void ledcount(){
     Led_Print(led_count);
 }
 
-void speedup(){StepMotor_SpeedUp_Status_Set(1);}
-void speedup_stop(){StepMotor_SpeedUp_Status_Set(0);}
-void brake(){StepMotor_Brake_Status_Set(1);}
-void brake_stop(){StepMotor_Brake_Status_Set(0);}
+// stepmotor
 code unsigned char decode_table[] =	{
 	0x3f,	0x06,	0x5b,	0x4f,	0x66,	0x6d,	0x7d,	0x07,	0x7f,	0x6f,
     0x77,	0x7c,	0x39,	0x5e,	0x79,	0x71,	0x3d,	0x76,	0x0f,	0x0e,
@@ -67,10 +64,52 @@ code unsigned char decode_table[] =	{
 };
 unsigned char speed[] = {0x6d, 0x73, 0x79, 0x79, 0x5e, 0, 0, 0};
 unsigned char stepmotorspeed;
+unsigned char turn_status; // 0 直 1 左 2 右
+unsigned char stepmotor_ledleft;
+unsigned char stepmotor_ledright;
+unsigned char stepmotor_ledbit;
+
 void segprintspeed(){
     stepmotorspeed = StepMotor_Speed_Get();
     OneSeg_Print(7, decode_table[stepmotorspeed & 0xf]);
     OneSeg_Print(6, decode_table[(stepmotorspeed >> 4) & 0xf]);
+}
+
+void ledprintdir(){
+    Led_Print(stepmotor_ledleft & 0xf0 | stepmotor_ledright & 0xf);
+    stepmotor_ledbit = (stepmotor_ledleft >> 7) & 1;
+    stepmotor_ledleft <<= 1;
+    stepmotor_ledleft |= stepmotor_ledbit;
+    stepmotor_ledbit = stepmotor_ledright & 1;
+    stepmotor_ledright >>= 1;
+    stepmotor_ledright |= stepmotor_ledbit << 7;
+}
+
+void callback100ms(){segprintspeed(); ledprintdir();}
+void speedup(){StepMotor_SpeedUp_Status_Set(1);}
+void speedup_stop(){StepMotor_SpeedUp_Status_Set(0);}
+void brake(){
+    StepMotor_Brake_Status_Set(1);
+    switch(turn_status){
+        case 0: stepmotor_ledleft = stepmotor_ledright = 0xff; break;
+        case 1: stepmotor_ledright = 0xff; break;
+        case 2: stepmotor_ledleft = 0xff; break;
+    }
+}
+void brake_stop(){
+    StepMotor_Brake_Status_Set(0);
+    switch(turn_status){
+        case 0: stepmotor_ledleft = stepmotor_ledright = 0; break;
+        case 1: stepmotor_ledright = 0; break;
+        case 2: stepmotor_ledleft = 0; break;
+    }
+}
+void turn_left(){turn_status = 1; stepmotor_ledleft = 0x11;}
+void turn_right(){turn_status = 2; stepmotor_ledright = 0x88;}
+void turn_on(){
+    turn_status = 0; 
+    if(StepMotor_Brake_Status_Get() == 0)stepmotor_ledleft = stepmotor_ledright = 0;
+    else stepmotor_ledleft = stepmotor_ledright = 0xff;
 }
 
 // end debug
@@ -85,12 +124,14 @@ int main(){
     AllSeg_Print(speed);
     Led_Print(0);
 
-    SetEventCallback(enumEvent_100ms, segprintspeed);
-    // SetEventCallback(enumEvent_NavKet_IsRelease, ledcount);
+    SetEventCallback(enumEvent_100ms, callback100ms);
     SetEventCallback(enumEvent_Key1_Press, speedup);
     SetEventCallback(enumEvent_key1_Release, speedup_stop);
     SetEventCallback(enumEvent_Key2_Press, brake);
     SetEventCallback(enumEvent_key2_Release, brake_stop);
+    SetEventCallback(enumEvent_NavKet_IsLeft, turn_left);
+    SetEventCallback(enumEvent_NavKet_IsRight, turn_right);
+    SetEventCallback(enumEvent_NavKet_IsRelease, turn_on);
 
     while(1);
 }
