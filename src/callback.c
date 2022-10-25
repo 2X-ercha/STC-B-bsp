@@ -8,6 +8,13 @@ EventCallback CallbackForKey1Press = 0;
 EventCallback CallbackForKey1Release = 0;
 EventCallback CallbackForKey2Press = 0;
 EventCallback CallbackForKey2Release = 0;
+EventCallback CallbackForKey3Press = 0;
+EventCallback CallbackForKey3Release = 0;
+EventCallback CallbackForNavKeyIsRight = 0;
+EventCallback CallbackForNavKeyIsDown = 0;
+EventCallback CallbackForNavKeyIsCenter = 0;
+EventCallback CallbackForNavKeyIsLeft = 0;
+EventCallback CallbackForNavKeyIsTop = 0;
 
 void SetEventCallback(unsigned char event_interrupt_api, void (*fp)()){
     switch(event_interrupt_api){
@@ -19,6 +26,13 @@ void SetEventCallback(unsigned char event_interrupt_api, void (*fp)()){
         case enumEvent_key1_Release:    CallbackForKey1Release = fp;    break;
         case enumEvent_Key2_Press:      CallbackForKey2Press = fp;      break;
         case enumEvent_key2_Release:    CallbackForKey2Release = fp;    break;
+        case enumEvent_Key3_Press:      CallbackForKey3Press = fp;      break;
+        case enumEvent_Key3_Release:    CallbackForKey3Release = fp;    break;
+        case enumEvent_NavKet_IsRight:  CallbackForNavKeyIsRight = fp;  break;
+        case enumEvent_NavKet_IsDown:   CallbackForNavKeyIsDown = fp;   break;
+        case enumEvent_NavKet_IsCenter: CallbackForNavKeyIsCenter = fp; break;
+        case enumEvent_NavKet_IsLeft:   CallbackForNavKeyIsLeft = fp;   break;
+        case enumEvent_NavKet_IsTop:    CallbackForNavKeyIsTop = fp;    break;
         default: break;
     }
 }

@@ -65,11 +65,9 @@ int main(){
     AllSeg_Print(hello);
     Led_Print(0);
 
-    SetEventCallback(enumEvent_100ms, waterled);
-    // SetEventCallback(enumEvent_Key1_Press, ledcount);
-    // SetEventCallback(enumEvent_key1_Release, ledcount);
-    // SetEventCallback(enumEvent_Key2_Press, Delay2000ms);
-    // SetEventCallback(enumEvent_key2_Release, seg7print2_);
+    // SetEventCallback(enumEvent_100ms, waterled);
+    SetEventCallback(enumEvent_NavKet_IsRight, ledcount);
+    SetEventCallback(enumEvent_Key3_Press, ledcount);
 
     while(1);
 }

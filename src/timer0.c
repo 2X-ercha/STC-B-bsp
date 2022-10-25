@@ -6,12 +6,12 @@
 
 unsigned int timer_count = 0;
 unsigned char k1_press_flag = 0;
-unsigned char k2_press_flag = 0;
 unsigned char k1_press_timing = 0;
-unsigned char k2_press_timing = 0;
 unsigned char k1_release_flag = 0;
-unsigned char k2_release_flag = 0;
 unsigned char k1_release_timing = 0;
+unsigned char k2_press_flag = 0;
+unsigned char k2_press_timing = 0;
+unsigned char k2_release_flag = 0;
 unsigned char k2_release_timing = 0;
 
 void Timer0_Init(){
@@ -33,10 +33,20 @@ void Timer0_Rountine() interrupt 1{
     segled_display();
     
     // 时间回调
-    if(CallbackFor1ms != 0)CallbackFor1ms();   
-    if(timer_count % 10 == 0 && CallbackFor10ms != 0){CallbackFor10ms();}
-    if(timer_count % 100 == 0 && CallbackFor100ms != 0){CallbackFor100ms();}
-    if(timer_count == 0 && CallbackFor1s != 0){CallbackFor1s();}
+    if(CallbackFor1ms != 0)CallbackFor1ms();
+    if(nav_key3_getadc_flag == 0 && timer_count % KEY_ANTISHAKE_MS == 0)Nav_Key3_GetAdc();
+
+    if(timer_count % 10 == 0){
+        if(CallbackFor10ms != 0){CallbackFor10ms();}
+
+        if(timer_count % 100 == 0){
+            if(CallbackFor100ms != 0){CallbackFor100ms();}
+
+            if(timer_count == 0){
+                if(CallbackFor1s != 0){CallbackFor1s();}
+            }
+        }
+    }
 
     // 时间回调计时flag
     timer_count ++;
