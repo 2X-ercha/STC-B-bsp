@@ -66,8 +66,7 @@ int main(){
     Led_Print(0);
 
     // SetEventCallback(enumEvent_100ms, waterled);
-    SetEventCallback(enumEvent_NavKet_IsRight, ledcount);
-    SetEventCallback(enumEvent_Key3_Press, ledcount);
+    SetEventCallback(enumEvent_NavKet_IsRelease, ledcount);
 
     while(1);
 }

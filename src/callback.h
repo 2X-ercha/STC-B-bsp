@@ -16,6 +16,7 @@
 #define enumEvent_NavKet_IsCenter 12
 #define enumEvent_NavKet_IsLeft 13
 #define enumEvent_NavKet_IsTop 14
+#define enumEvent_NavKet_IsRelease 15
 
 typedef void (*EventCallback)(void);
 extern EventCallback CallbackFor1ms;
@@ -33,6 +34,7 @@ extern EventCallback CallbackForNavKeyIsDown;
 extern EventCallback CallbackForNavKeyIsCenter;
 extern EventCallback CallbackForNavKeyIsLeft;
 extern EventCallback CallbackForNavKeyIsTop;
+extern EventCallback CallbackForNavKeyIsRelease;
 
 void SetEventCallback(unsigned char event_interrupt_api, void (*fp)());
 

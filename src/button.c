@@ -110,6 +110,8 @@ void ADC_Routine() interrupt 5{
             case 7:
                 // key3 release
                 if(real_last_adc == 0 && CallbackForKey3Release != 0){CallbackForKey3Release();}
+                // nav release
+                else if(real_last_adc > 0 && real_last_adc < 6 && CallbackForNavKeyIsRelease != 0){CallbackForNavKeyIsRelease();}
                 break;
             default: break;
         }
