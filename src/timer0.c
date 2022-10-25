@@ -3,6 +3,7 @@
 #include "timer0.h"
 #include "seg_led.h"
 #include "button.h"
+#include "sm.h"
 
 unsigned int timer_count = 0;
 unsigned char k1_press_flag = 0;
@@ -38,6 +39,7 @@ void Timer0_Rountine() interrupt 1{
 
     if(timer_count % 10 == 0){
         if(CallbackFor10ms != 0){CallbackFor10ms();}
+        StepMotor_Next();
 
         if(timer_count % 100 == 0){
             if(CallbackFor100ms != 0){CallbackFor100ms();}
