@@ -39,6 +39,7 @@ void Timer0_Rountine() interrupt 1{
         if(tone_time <= 0){
             beep_used = 0;
             TR1 = 0;
+            P34 = 0;
         }
         tone_time--;
     }

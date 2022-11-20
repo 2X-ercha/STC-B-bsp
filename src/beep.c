@@ -103,16 +103,19 @@ void BeepMusic_Reset(){
             TR1 = 1;
         else
             TR1 = 0;
+            P34 = 0;
     }
     else if(tone_pause_flag){
         // 不同音间小停顿
         tone_pause_flag = 0;
         TR1 = 0;
+        P34 = 0;
         tone_time = 3750 / __music_speed;
     }
     else{
         // 结束
         TR1 = 0;
+        P34 = 0;
         music_used = 0;
         music_pos = 0;
     }
@@ -145,11 +148,13 @@ void BeepMusicPlayer_StatusSet(unsigned char status){
         case enumBeepMusicPlayer_Pause:
             music_used = 0;
             TR1 = 0;
+            P34 = 0;
             break;
         case enumBeepMusicPlayer_Stop:
             music_used = 0;
             music_pos = 0;
             TR1 = 0;
+            P34 = 0;
             break;
         default:
             break;
