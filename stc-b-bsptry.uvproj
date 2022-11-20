@@ -435,6 +435,16 @@
               <FileType>5</FileType>
               <FilePath>.\src\sm.h</FilePath>
             </File>
+            <File>
+              <FileName>beep.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\beep.c</FilePath>
+            </File>
+            <File>
+              <FileName>beep.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\src\beep.h</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>

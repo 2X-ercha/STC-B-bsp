@@ -19,7 +19,6 @@
 
 unsigned char last_adc;         // 用于消抖检验
 unsigned char real_last_adc;    // 消抖前最后一次
-unsigned char change_flag;
 unsigned char nav_key3_getadc_flag;
 
 void Button_Init(){
@@ -42,7 +41,6 @@ void Button_Init(){
     
     nav_key3_getadc_flag = 0;
     last_adc = real_last_adc = 0x7;
-    change_flag = 0;
 }
 
 void Int0_Routine() interrupt 0
@@ -77,11 +75,7 @@ void ADC_Routine() interrupt 5{
     unsigned char nav_key3_adc;
     ADC_CONTR &= ~cstAdcFlag;
     nav_key3_adc = (ADC_RES >> 5) & 0x7;
-    if(last_adc != nav_key3_adc){
-        change_flag = 1;
-    }
-    else if(change_flag == 1){
-        change_flag = 0;
+    if(last_adc == nav_key3_adc && real_last_adc != nav_key3_adc){
         switch (nav_key3_adc){
             case 0:     
                 // key3 press

@@ -4,6 +4,7 @@
 #include "seg_led.h"
 #include "button.h"
 #include "sm.h"
+#include "beep.h"
 
 unsigned int timer_count = 0;
 unsigned char k1_press_flag = 0;
@@ -33,6 +34,22 @@ void Timer0_Rountine() interrupt 1{
         display_pos_next();
     segled_display();
     
+    // beep长鸣
+    if(beep_used && !music_used){
+        if(tone_time <= 0){
+            beep_used = 0;
+            TR1 = 0;
+        }
+        tone_time--;
+    }
+    // beepmusic
+    if(music_used && !beep_used){
+        if(tone_time == 0){
+            BeepMusic_Reset();
+        }
+        tone_time--;
+    }
+
     // 时间回调
     if(CallbackFor1ms != 0)CallbackFor1ms();
     if(nav_key3_getadc_flag == 0 && timer_count % KEY_ANTISHAKE_MS == 0)Nav_Key3_GetAdc();
