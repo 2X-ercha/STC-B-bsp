@@ -60,6 +60,7 @@ void StepMotor_Next(){
 }
 
 unsigned char StepMotor_Speed_Get(){return stepmotor_speed;}
+void StepMotor_Speed_Set(unsigned char speed){stepmotor_speed = speed;}
 
 // stepmotor加速状态设置
 void StepMotor_SpeedUp_Status_Set(unsigned char status){if(stepmotor_brake_status == 0 && status)stepmotor_speedup_status = 1; else stepmotor_speedup_status = 0;}

@@ -66,52 +66,65 @@ code unsigned char testmusic[] = {
 };
 
 unsigned char led_count = 0;
-void ledcount(){
+void led_count_up(){
     led_count ++;
     Led_Print(led_count);
 }
-
-void beep_test(){
-    Beep_Print(261, 500);
+void led_count_down(){
+    led_count --;
+    Led_Print(led_count);
 }
 
-void music_play(){
-    BeepMusicPlayer_StatusSet(enumBeepMusicPlayer_Play);
-}
-
-void music_pause(){
-    BeepMusicPlayer_StatusSet(enumBeepMusicPlayer_Pause);
-}
-
-void music_stop(){
-    BeepMusicPlayer_StatusSet(enumBeepMusicPlayer_Stop);
-}
-
-void music_frequency_specctrum_led(){
-	unsigned char led_left2, led_right6, led_all = 0;
-	if(music_pos == 0){
-		Led_Print(0x00);
+int beeptone = 0;
+void segprinttone(){
+	if(beeptone >= 1000){
+		OneSeg_Print(0, number[beeptone/1000]);
+		OneSeg_Print(1, number[beeptone/100%10]);
+		OneSeg_Print(2, number[beeptone/10%10]);
+		OneSeg_Print(3, number[beeptone%10]);
+		OneSeg_Print(4, 0);
+		OneSeg_Print(5, 0x76);
+		OneSeg_Print(6, 0x59);
+	}
+	else if(beeptone > 0){
+		OneSeg_Print(0, number[beeptone/100]);
+		OneSeg_Print(1, number[beeptone/10%10]);
+		OneSeg_Print(2, number[beeptone%10]);
+		OneSeg_Print(3, 0);
+		OneSeg_Print(4, 0x76);
+		OneSeg_Print(5, 0x59);
 		OneSeg_Print(6, 0);
-		OneSeg_Print(7, 0);
 	}
 	else{
-		led_left2 = (testmusic[music_pos - 2] >> 4) & 0xf;
-		led_right6 = testmusic[music_pos - 2] & 0xf;
-		switch(led_left2){
-			case 2: led_all |= 0x40; break;
-			case 3: led_all |= 0xc0; break;
-		}
-		switch(led_right6){
-			case 3: led_all |= 0x10; break;
-			case 4: led_all |= 0x18; break;
-			case 5: led_all |= 0x1c; break;
-			case 6: led_all |= 0x1e; break;
-			case 7: led_all |= 0x1f; break;
-		}
-		Led_Print(led_all);
-		OneSeg_Print(6, number[(testmusic[music_pos - 2] >> 4) & 0xf]);
-		OneSeg_Print(7, number[testmusic[music_pos - 2] & 0xf]);
+		OneSeg_Print(0, number[0]);
+		OneSeg_Print(1, 0);
+		OneSeg_Print(2, 0x76);
+		OneSeg_Print(3, 0x59);
+		OneSeg_Print(4, 0);
+		OneSeg_Print(5, 0);
+		OneSeg_Print(6, 0);
 	}
+}
+
+void music_status_change(){
+	if(music_used){
+		BeepMusicPlayer_StatusSet(enumBeepMusicPlayer_Pause);
+	}
+	else if(!beep_used){
+		BeepMusicPlayer_StatusSet(enumBeepMusicPlayer_Play);
+	}
+}
+
+void beep_tone_up(){
+	if((beeptone < 2000) && !music_used){beeptone += 200; Beep_Print(beeptone, 500);}
+	segprinttone();
+	StepMotor_Speed_Set(beeptone >> 3);
+}
+
+void beep_tone_down(){
+	if((beeptone >= 200) && !music_used){beeptone -= 200; Beep_Print(beeptone, 500);}
+	segprinttone();
+	StepMotor_Speed_Set(beeptone >> 3);
 }
 
 // end debug
@@ -121,16 +134,18 @@ int main(){
     Timer0_Init();
     Button_Init();
     // SM_Init();
-    // StepMotor_Init();
+    StepMotor_Init();
     Beep_Init();
     BeepMusicPlayer_MusicInit(0xFB, 140, testmusic, sizeof(testmusic));
-	AllSeg_Print(hello);
+	segprinttone();
+	// AllSeg_Print(hello);
     Led_Print(0);
-    SetEventCallback(enumEvent_key1_Release, music_stop);
-    SetEventCallback(enumEvent_key2_Release, music_pause);
-    SetEventCallback(enumEvent_Key3_Release, music_play);
-    // SetEventCallback(enumEvent_1s, ledcount);
-	SetEventCallback(enumEvent_10ms, music_frequency_specctrum_led);
+    SetEventCallback(enumEvent_key1_Release, beep_tone_down);
+    SetEventCallback(enumEvent_key2_Release, beep_tone_up);
+    SetEventCallback(enumEvent_Key3_Release, music_status_change);
+
+	SetEventCallback(enumEvent_NavKet_IsTop, led_count_up);
+	SetEventCallback(enumEvent_NavKet_IsDown, led_count_down);
 
     while(1);
 }

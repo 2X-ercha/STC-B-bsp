@@ -4,12 +4,13 @@
 extern void SM_Init();
 extern void SM_Print(char data_row);
 
-extern void StepMotor_Init();
-extern void StepMotor_Next();
-extern unsigned char StepMotor_Speed_Get();
-extern void StepMotor_SpeedUp_Status_Set(unsigned char status);
-extern unsigned char StepMotor_SpeedUp_Status_Get();
-extern void StepMotor_Brake_Status_Set(unsigned char status);
-extern unsigned char StepMotor_Brake_Status_Get();
+void StepMotor_Init();
+void StepMotor_Next();
+unsigned char StepMotor_Speed_Get();
+void StepMotor_Speed_Set(unsigned char speed);
+void StepMotor_SpeedUp_Status_Set(unsigned char status);
+unsigned char StepMotor_SpeedUp_Status_Get();
+void StepMotor_Brake_Status_Set(unsigned char status);
+unsigned char StepMotor_Brake_Status_Get();
 
 #endif

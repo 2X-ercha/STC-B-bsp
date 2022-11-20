@@ -75,7 +75,7 @@ void Beep_Init(){
 
 void Beep_Print(unsigned int rate, unsigned int time){
     // rate: 频率; time: 持续时间ms
-    if(!music_used){
+    if(!music_used && rate){
         unsigned int T_2 =  65536 - (MAIN_Fosc / 2 / rate);
         TH1_buff = T_2 >> 8;
         TL1_buff = T_2 & 0xf;
