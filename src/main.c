@@ -7,6 +7,7 @@
 #include "button.h"
 #include "sm.h"
 #include "beep.h"
+#include "uart.h"
 
 #include <INTRINS.H>
 // debug test fun
@@ -20,6 +21,7 @@ void waterled(){
     Led_Print(ledtest);
 }
 unsigned char hello[8] = {0x76, 0x79, 0x38, 0x38, 0x5c, 0, 0, 0};
+unsigned char text[4] = {0xaa, 0x55, 0xaa, 0x55};
 code char number[] = {0x3f,	0x06,	0x5b,	0x4f,	0x66,	0x6d,	0x7d,	0x07,	0x7f,	0x6f,};
 
 code unsigned char testmusic[] = {
@@ -75,37 +77,6 @@ void led_count_down(){
     Led_Print(led_count);
 }
 
-int beeptone = 0;
-void segprinttone(){
-	if(beeptone >= 1000){
-		OneSeg_Print(0, number[beeptone/1000]);
-		OneSeg_Print(1, number[beeptone/100%10]);
-		OneSeg_Print(2, number[beeptone/10%10]);
-		OneSeg_Print(3, number[beeptone%10]);
-		OneSeg_Print(4, 0);
-		OneSeg_Print(5, 0x76);
-		OneSeg_Print(6, 0x59);
-	}
-	else if(beeptone > 0){
-		OneSeg_Print(0, number[beeptone/100]);
-		OneSeg_Print(1, number[beeptone/10%10]);
-		OneSeg_Print(2, number[beeptone%10]);
-		OneSeg_Print(3, 0);
-		OneSeg_Print(4, 0x76);
-		OneSeg_Print(5, 0x59);
-		OneSeg_Print(6, 0);
-	}
-	else{
-		OneSeg_Print(0, number[0]);
-		OneSeg_Print(1, 0);
-		OneSeg_Print(2, 0x76);
-		OneSeg_Print(3, 0x59);
-		OneSeg_Print(4, 0);
-		OneSeg_Print(5, 0);
-		OneSeg_Print(6, 0);
-	}
-}
-
 void music_status_change(){
 	if(music_used){
 		BeepMusicPlayer_StatusSet(enumBeepMusicPlayer_Pause);
@@ -115,16 +86,8 @@ void music_status_change(){
 	}
 }
 
-void beep_tone_up(){
-	if((beeptone < 2000) && !music_used){beeptone += 200; Beep_Print(beeptone, 500);}
-	segprinttone();
-	StepMotor_Speed_Set(beeptone >> 3);
-}
-
-void beep_tone_down(){
-	if((beeptone >= 200) && !music_used){beeptone -= 200; Beep_Print(beeptone, 500);}
-	segprinttone();
-	StepMotor_Speed_Set(beeptone >> 3);
+void USBcom_Transmition(){
+	USBcom_Write(usbcom_buf);
 }
 
 // end debug
@@ -133,19 +96,18 @@ int main(){
     Seg_Led_Init();
     Timer0_Init();
     Button_Init();
-    // SM_Init();
-    StepMotor_Init();
-    Beep_Init();
-    BeepMusicPlayer_MusicInit(0xFB, 140, testmusic, sizeof(testmusic));
-	segprinttone();
-	// AllSeg_Print(hello);
-    Led_Print(0);
-    SetEventCallback(enumEvent_key1_Release, beep_tone_down);
-    SetEventCallback(enumEvent_key2_Release, beep_tone_up);
-    SetEventCallback(enumEvent_Key3_Release, music_status_change);
+	USBcom_Init(115200);
+	USBcom_Write("hallo c51 usbcom!\r\n");
+    Led_Print(0x55);
+	AllSeg_Print(hello);
 
-	SetEventCallback(enumEvent_NavKet_IsTop, led_count_up);
-	SetEventCallback(enumEvent_NavKet_IsDown, led_count_down);
-
-    while(1);
+	SetEventCallback(enumEvent_USBcom_Receive, USBcom_Transmition);
+	// sys
+    while(1) {
+		// callback
+		if(usbcom_receive) {
+			if(CallbackForUSBcomReceive != 0) CallbackForUSBcomReceive();
+			usbcom_receive = 0;
+		}
+	}
 }

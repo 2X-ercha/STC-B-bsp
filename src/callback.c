@@ -16,6 +16,7 @@ EventCallback CallbackForNavKeyIsCenter = 0;
 EventCallback CallbackForNavKeyIsLeft = 0;
 EventCallback CallbackForNavKeyIsTop = 0;
 EventCallback CallbackForNavKeyIsRelease = 0;
+EventCallback CallbackForUSBcomReceive = 0;
 
 void SetEventCallback(unsigned char event_interrupt_api, void (*fp)()){
     switch(event_interrupt_api){
@@ -35,6 +36,7 @@ void SetEventCallback(unsigned char event_interrupt_api, void (*fp)()){
         case enumEvent_NavKet_IsLeft:   CallbackForNavKeyIsLeft = fp;   break;
         case enumEvent_NavKet_IsTop:    CallbackForNavKeyIsTop = fp;    break;
         case enumEvent_NavKet_IsRelease:CallbackForNavKeyIsRelease = fp;break;
+        case enumEvent_USBcom_Receive:  CallbackForUSBcomReceive = fp;  break;
         default: break;
     }
 }
